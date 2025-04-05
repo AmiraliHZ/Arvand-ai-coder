@@ -99,8 +99,8 @@ if __name__ == "__main__":
 
 
 
-#//////////////////////////////////////////////// with html test2 ////////////////////////////////////////////////
-
+#//////////////////////////////////////////////// with html test2** ////////////////////////////////////////////////
+'''
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import openai
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
-
+'''
 
 
 
@@ -348,3 +348,57 @@ def update_message():
 if __name__ == "__main__":
     app.run(debug=True)
 '''
+
+
+
+
+
+
+
+
+
+#//////////////////////////////////////////////// making it online test1 ////////////////////////////////////////////////
+
+import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import openai
+
+app = Flask(__name__)
+CORS(app)
+
+# تنظیمات API
+API_KEY = os.getenv("API_KEY")  # از متغیر محیطی خوانده می‌شود
+BASE_URL = os.getenv("BASE_URL")  # از متغیر محیطی خوانده می‌شود
+
+# تنظیم کلاینت OpenAI
+client = openai.OpenAI(api_key=API_KEY, base_url=BASE_URL)
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    user_prompt = data.get("prompt", "")
+    if not user_prompt:
+        return jsonify({"error": "Empty prompt"}), 400
+
+    try:
+        # ارسال درخواست به NVIDIA API
+        response = client.chat.completions.create(
+            model="qwen/qwen2.5-coder-32b-instruct",
+            messages=[{"role": "user", "content": user_prompt}],
+            temperature=0.2,
+            top_p=0.7,
+            max_tokens=1024,
+            stream=False
+        )
+
+        # استخراج پاسخ
+        content = response.choices[0].message.content
+        return jsonify({"content": content})
+
+    except Exception as e:
+        print(f"API Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True)
