@@ -363,6 +363,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import openai
+from flask import render_template
 
 app = Flask(__name__)
 CORS(app)
@@ -376,6 +377,7 @@ client = openai.OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    return render_template("test 01 ui coder.html")
     data = request.json
     user_prompt = data.get("prompt", "")
     if not user_prompt:
