@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Code Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#5D5CDE',
+            cosmic: {
+              purple: '#3D1A54',
+              deep: '#1E0B2A',
+              accent: '#0FD7A5',
+              highlight: '#FF4B77',
+              dark: '#0A0514'
+            }
+          },
+          backgroundImage: {
+            'cosmic-gradient': 'linear-gradient(135deg, #1E0B2A 0%, #3D1A54 50%, #211134 100%)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .code-editor {
+      min-height: 300px;
+      font-family: monospace, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono';
+    }
+    
+    .cosmic-rays {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.3;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(15, 215, 165, 0.5) 0%, transparent 20%),
+        radial-gradient(circle at 80% 20%, rgba(255, 75, 119, 0.3) 0%, transparent 25%),
+        radial-gradient(circle at 50% 60%, rgba(93, 92, 222, 0.4) 0%, transparent 30%);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #1E0B2A;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #5D5CDE;
+      border-radius: 4px;
+    }
+    
+    /* Blinking cursor animation */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    .cursor-blink::after {
+      content: '|';
+      animation: blink 1s infinite;
+      color: #0FD7A5;
+    }
+
+    /* For dark mode support */
+    .dark body {
+      background-color: #0A0514;
+      color: #f1f1f1;
+    }
+    
+    .loader {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top: 3px solid #0FD7A5;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .code-output pre {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      background-color: #282c34;
+      color: #abb2bf;
+    }
+  </style>
+</head>
+<body class="bg-cosmic-deep text-white relative min-h-screen overflow-x-hidden font-sans">
+  <!-- Cosmic rays background effect -->
+  <div class="cosmic-rays"></div>
+  
+  <div class="container mx-auto p-4 md:p-6 relative z-10">
+    <header class="mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold text-cosmic-accent">
+        <span class="text-white">ARVAND</span> AI <span class="text-cosmic-highlight">Coder</span>
+      </h1>
+      <p class="text-gray-300 mt-2">Powered by AI Model</p>
+    </header>
+    
+    <main>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left side: Input area -->
+        <div class="space-y-4">
+          <div class="bg-cosmic-purple bg-opacity-50 backdrop-blur-md rounded-lg p-4 border border-primary border-opacity-30">
+            <label for="prompt" class="block text-sm font-medium text-gray-300 mb-2">Describe what you want to generate</label>
+            <textarea id="prompt" rows="4" class="w-full bg-cosmic-deep bg-opacity-70 text-white rounded-md border border-gray-700 focus:ring-2 focus:ring-cosmic-accent focus:border-transparent p-3 text-base" placeholder="E.g., Write a Python function to calculate the Fibonacci sequence"></textarea>
+          </div>
+          
+          <div class="bg-cosmic-purple bg-opacity-50 backdrop-blur-md rounded-lg p-4 border border-primary border-opacity-30">
+            <div class="flex justify-between items-center mb-3">
+              <label class="block text-sm font-medium text-gray-300">Model Parameters</label>
+              <button id="toggleParams" class="text-xs text-cosmic-accent hover:text-cosmic-highlight">
+                Advanced ▼
+              </button>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex flex-col space-y-1">
+                <label for="temperature" class="text-xs text-gray-300">Temperature: <span id="tempValue">0.7</span></label>
+                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" class="w-full h-2 bg-cosmic-deep rounded-lg appearance-none cursor-pointer">
+              </div>
+              
+              <div id="advancedParams" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-700">
+                <div class="flex flex-col space-y-1">
+                  <label for="maxTokens" class="text-xs text-gray-300">Max Length: <span id="maxTokensValue">1024</span></label>
+                  <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1024" class="w-full h-2 bg-cosmic-deep rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div class="flex flex-col space-y-1">
+                  <label for="topP" class="text-xs text-gray-300">Top P: <span id="topPValue">0.9</span></label>
+                  <input type="range" id="topP" min="0.1" max="1" step="0.1" value="0.9" class="w-full h-2 bg-cosmic-deep rounded-lg appearance-none cursor-pointer">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <button id="generateBtn" class="w-full py-3 bg-primary hover:bg-opacity-90 text-white font-medium rounded-md transition-all duration-200 flex items-center justify-center space-x-2">
+            <span>Generate Code</span>
+          </button>
+        </div>
+        
+        <!-- Right side: Output area -->
+        <div class="bg-cosmic-purple bg-opacity-50 backdrop-blur-md rounded-lg p-4 border border-primary border-opacity-30 flex flex-col">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-medium text-cosmic-accent">Generated Python Code</h3>
+            <button id="copyBtn" class="text-xs text-gray-300 hover:text-cosmic-accent px-2 py-1 border border-gray-700 rounded-md">
+              Copy
+            </button>
+          </div>
+          
+          <div id="codeOutput" class="code-output flex-grow overflow-auto">
+            <div class="h-full flex items-center justify-center text-gray-400 text-center p-4">
+              <p>Your generated Python code will appear here.<br>Describe what you need in the prompt field and click "Generate Code".</p>
+            </div>
+          </div>
+          
+          <div id="loading" class="hidden h-full flex-grow flex items-center justify-center">
+            <div class="flex flex-col items-center space-y-3">
+              <div class="loader"></div>
+              <p class="text-sm text-gray-400">Generating Python code...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Error message display -->
+      <div id="errorMessage" class="hidden mt-4 p-3 bg-red-900 bg-opacity-40 border border-red-600 text-red-200 rounded-md">
+      </div>
+    </main>
+    
+    <footer class="mt-12 text-center text-gray-500 text-sm">
+      <p> model from NVIDIA</p>
+    </footer>
+  </div>
+
+  <script>
+    // Check for dark mode
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+    
+    // Toggle advanced parameters functionality
+    document.getElementById('toggleParams').addEventListener('click', () => {
+      const advancedParams = document.getElementById('advancedParams');
+      const toggleBtn = document.getElementById('toggleParams');
+      advancedParams.classList.toggle('hidden');
+      toggleBtn.textContent = advancedParams.classList.contains('hidden') ? 'Advanced ▼' : 'Advanced ▲';
+    });
+
+    // Function to send request to Flask backend
+    async function generateCode() {
+      const prompt = document.getElementById("prompt").value;
+      const temperature = parseFloat(document.getElementById("temperature").value);
+      const maxTokens = parseInt(document.getElementById("maxTokens").value);
+      const topP = parseFloat(document.getElementById("topP").value);
+
+      if (!prompt.trim()) {
+        alert("Please enter a prompt.");
+        return;
+      }
+
+      // Clear previous output and error messages
+      document.getElementById("codeOutput").innerHTML = "";
+      document.getElementById("errorMessage").classList.add("hidden");
+      document.getElementById("errorMessage").textContent = "";
+
+      // Show loading spinner
+      document.getElementById("loading").classList.remove("hidden");
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: prompt,
+            temperature: temperature,
+            max_tokens: maxTokens,
+            top_p: topP
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Display generated code
+          document.getElementById("codeOutput").innerHTML = `
+            <pre class="bg-gray-800 text-white p-4 rounded-md">${result.content}</pre>
+          `;
+        } else {
+          // Display error message
+          document.getElementById("errorMessage").textContent = result.error || "An error occurred.";
+          document.getElementById("errorMessage").classList.remove("hidden");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("errorMessage").textContent = "Failed to connect to the server.";
+        document.getElementById("errorMessage").classList.remove("hidden");
+      } finally {
+        // Hide loading spinner
+        document.getElementById("loading").classList.add("hidden");
+      }
+    }
+
+    // Attach event listener to the "Generate Code" button
+    document.getElementById("generateBtn").addEventListener("click", generateCode);
+
+    // Copy generated code to clipboard
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      const codeOutput = document.querySelector("#codeOutput pre");
+      if (codeOutput) {
+        navigator.clipboard.writeText(codeOutput.textContent).then(() => {
+          alert("Code copied to clipboard!");
+        }).catch(err => {
+          console.error("Failed to copy code:", err);
+          alert("Failed to copy code. Please try again.");
+        });
+      } else {
+        alert("No code to copy.");
+      }
+    });
+  </script>
+</body>
+</html>
