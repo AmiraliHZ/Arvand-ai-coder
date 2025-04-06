@@ -369,15 +369,17 @@ app = Flask(__name__)
 CORS(app)
 
 # تنظیمات API
-API_KEY = os.getenv("API_KEY")  # از متغیر محیطی خوانده می‌شود
-BASE_URL = os.getenv("BASE_URL")  # از متغیر محیطی خوانده می‌شود
+#API_KEY = os.getenv("API_KEY")  # از متغیر محیطی خوانده می‌شود
+#BASE_URL = os.getenv("BASE_URL")  # از متغیر محیطی خوانده می‌شود
+
+API_KEY = "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"  # کلید API خود را قرار دهید
+BASE_URL = "https://integrate.api.nvidia.com/v1"
 
 # تنظیم کلاینت OpenAI
 client = openai.OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    return render_template("test 01 ui coder.html")
     data = request.json
     user_prompt = data.get("prompt", "")
     if not user_prompt:
